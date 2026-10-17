@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArogyaCamp - Medical Camp Outreach &amp; Analytics Portal</title>
+  
+  <!-- Modern Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* =======================================================
+       1. WINNING MEDICAL GREEN THEME & DESIGN TOKENS
+    ======================================================= */
+    :root {
+      --primary: #059669;          /* Emerald Green */
+      --primary-hover: #047857;    /* Deep Emerald */
+      --primary-dark: #064e3b;     /* Forest Green */
+      --primary-light: #ecfdf5;    /* Mint Tint */
+      --primary-glow: rgba(5, 150, 105, 0.22);
+      
+      --secondary: #0d9488;        /* Medical Teal */
+      --secondary-light: #f0fdfa;
+      --accent: #10b981;           /* Bright Mint */
+      
+      --dark: #06281e;             /* Deep Spruce Black */
+      --dark-card: #0f372a;
+      --muted: #52796f;            /* Sage Muted Text */
+      --border-subtle: rgba(16, 185, 129, 0.18);
+      --border-card: #d1fae5;
+      
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --glass-nav: rgba(255, 255, 255, 0.88);
+      
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-soft: 0 12px 32px -4px rgba(6, 40, 30, 0.06), 0 4px 12px -2px rgba(6, 40, 30, 0.03);
+      --shadow-hover: 0 20px 40px -8px rgba(5, 150, 105, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    /* =======================================================
+       2. ATTRACTIVE MEDICAL WATERMARK & AMBIENT BACKGROUND
+    ======================================================= */
+    body {
+      color: var(--dark);
+      min-height: 100vh;
+      background-color: #f2fbf7;
+      /* Layered Medical Watermark: Crosses + Heartbeat Pulse (ECG) Lines + Ambient Emerald Glow */
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(16, 185, 129, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(5, 150, 105, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(13, 148, 136, 0.06) 0%, transparent 60%),
+        /* High-Definition Medical Cross + Pulse SVG Watermark Pattern */
+        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23059669' fill-opacity='0.045' fill-rule='evenodd'%3E%3Cpath d='M34 26v-8h12v8h8v12h-8v8H34v-8h-8V26h8zm-20 36v-4h6v4h4v6h-4v4h-6v-4h-4v-6h4zm52 0v-4h6v4h4v6h-4v4h-6v-4h-4v-6h4z'/%3E%3Cpath d='M10 20h6l3 6 4-12 4 10 3-4h6' stroke='%23059669' stroke-width='1.5' stroke-opacity='0.045' fill='none'/%3E%3C/g%3E%3C/svg%3E");
+      background-attachment: fixed;
+    }
+
+    /* =======================================================
+       3. NAVIGATION BAR (GLASSMORPHISM)
+    ======================================================= */
+    .navbar {
+      height: 76px;
+      background: var(--glass-nav);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 36px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(5, 150, 105, 0.04);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: var(--radius-sm);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      box-shadow: 0 6px 16px var(--primary-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: #e6f7ef;
+      padding: 4px;
+      border-radius: var(--radius-md);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 9px 20px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--primary-dark);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 10px rgba(5, 150, 105, 0.12);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* GOOGLE BUTTON */
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+      color: #374151;
+      border: 1px solid #d1fae5;
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(6, 40, 30, 0.04);
+    }
+
+    .btn-google:hover {
+      background: #f0fdf4;
+      border-color: #a7f3d0;
+      transform: translateY(-1px);
+    }
+
+    .google-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* USER PROFILE BADGE */
+    .user-profile-badge {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #ecfdf5;
+      padding: 5px 14px 5px 6px;
+      border-radius: 30px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .user-avatar-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .user-email {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .btn-signout {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 6px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .btn-signout:hover {
+      background: #fee2e2;
+    }
+
+    /* BUTTONS */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      border-color: #a7f3d0;
+      color: var(--primary-dark);
+    }
+    .btn-outline:hover {
+      background: #ecfdf5;
+      border-color: var(--primary);
+    }
+
+    /* =======================================================
+       4. CONTAINER & HERO BANNER
+    ======================================================= */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 24px 70px;
+    }
+
+    .medical-hero-banner {
+      background: linear-gradient(135deg, rgba(6, 78, 59, 0.94) 0%, rgba(15, 118, 110, 0.9) 100%),
+        url("https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
+      border-radius: var(--radius-lg);
+      padding: 34px 38px;
+      color: #ffffff;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(6, 78, 59, 0.2);
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #a7f3d0;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .medical-hero-banner h2 {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      max-width: 820px;
+    }
+
+    .medical-hero-banner p {
+      color: #d1fae5;
+      font-size: 14px;
+      max-width: 720px;
+      margin-bottom: 18px;
+    }
+
+    .hero-stats-strip {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6ee7b7;
+    }
+
+    /* =======================================================
+       5. METRIC STATS CARDS
+    ======================================================= */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .stat-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .stat-pill {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .stat-pill.green { background: #dcfce7; color: #15803d; }
+    .stat-pill.teal { background: #ccfbf1; color: #0f766e; }
+    .stat-pill.amber { background: #fef3c7; color: #b45309; }
+
+    .stat-number {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* =======================================================
+       6. CHARTS SECTION
+    ======================================================= */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.25fr;
+      gap: 22px;
+      margin-bottom: 34px;
+    }
+
+    .chart-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 26px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .chart-box h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+    }
+
+    .chart-box p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 290px;
+    }
+
+    /* =======================================================
+       7. CAMPS & SCHEDULES SECTION
+    ======================================================= */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .section-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pill {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1px solid #d1fae5;
+      background: #ffffff;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.15s ease;
+    }
+    .pill.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .camps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 22px;
+      margin-bottom: 36px;
+    }
+
+    .camp-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .camp-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .camp-status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+    .camp-status-badge.upcoming { background: #dcfce7; color: #166534; }
+    .camp-status-badge.active { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .camp-status-badge.completed { background: #f1f5f9; color: #475569; }
+
+    .camp-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+    }
+
+    .camp-specialty {
+      font-size: 13.5px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .camp-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .capacity-bar-container {
+      margin-bottom: 20px;
+    }
+
+    .capacity-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .capacity-bar-bg {
+      height: 8px;
+      background: #e6f7ef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .capacity-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .camp-card-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* =======================================================
+       8. REGISTERED PARTICIPANTS TABLE
+    ======================================================= */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .table-toolbar {
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-card);
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      padding: 10px 16px;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      font-size: 13.5px;
+      width: 320px;
+      outline: none;
+      transition: border 0.2s ease;
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    th {
+      background: #f0fdf4;
+      padding: 14px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      border-bottom: 1px solid var(--border-card);
+      text-align: left;
+    }
+
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid #f1fdf7;
+      color: var(--dark);
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .status-tag {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .status-tag.confirmed { background: #dcfce7; color: #166534; }
+    .status-tag.checked-in { background: #ccfbf1; color: #0f766e; }
+    .status-tag.waitlist { background: #fef3c7; color: #b45309; }
+
+    /* =======================================================
+       9. MODALS & TOAST ALERTS
+    ======================================================= */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 40, 30, 0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal.open { display: flex; }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      padding: 30px;
+      box-shadow: 0 25px 50px -12px rgba(6, 40, 30, 0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h3 { font-size: 19px; font-weight: 800; color: var(--primary-dark); }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .form-group input, .form-group select {
+      padding: 10px 14px;
+      border: 1px solid #d1fae5;
+      border-radius: 8px;
+      font-size: 13.5px;
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary);
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+    /* GOOGLE DEMO SELECTION */
+    .google-account-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .google-account-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 1px solid #d1fae5;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .google-account-item:hover {
+      background-color: #f0fdf4;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .g-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .g-avatar.teal { background: var(--secondary); }
+
+    /* FLOATING TOAST NOTIFICATION */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 150;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #064e3b;
+      color: #ffffff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(6, 40, 30, 0.25);
+      border-left: 4px solid var(--accent);
+      transform: translateX(120%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .view-section { display: block; }
+    .view-section.hidden { display: none; }
+
+    @media (max-width: 900px) {
+      .navbar { padding: 14px; flex-direction: column; height: auto; gap: 14px; }
+      .charts-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= TOP NAVIGATION ================= -->
+  <header class="navbar">
+    <div class="brand-wrap">
+      <div class="brand-logo">✚</div>
+      <div class="brand-text">
+        <h1>ArogyaCamp</h1>
+        <span>Healthcare Outreach &amp; Analytics</span>
+      </div>
+    </div>
+
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('analyticsTab', this)">📊 Outreach Analytics</button>
+      <button class="tab-btn" onclick="switchTab('campsTab', this)">📅 Camp Schedules</button>
+      <button class="tab-btn" onclick="switchTab('participantsTab', this)">👥 Registered Participants</button>
+    </nav>
+
+    <div class="nav-right">
+      <!-- GOOGLE SIGN IN (Logged Out) -->
+      <button id="googleSignInBtn" class="btn-google" onclick="openModal('googleAuthModal')">
+        <svg class="google-icon" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span>Sign in with Google</span>
+      </button>
+
+      <!-- USER PROFILE (Logged In) -->
+      <div id="userProfileBadge" class="user-profile-badge">
+        <div class="user-avatar-img" id="userAvatarText">RV</div>
+        <div class="user-details">
+          <span class="user-name" id="userNameText">Rahul Verma</span>
+          <span class="user-email" id="userEmailText">rahul.verma@gmail.com</span>
+        </div>
+        <button class="btn-signout" onclick="handleSignOut()">Sign Out</button>
+      </div>
+
+      <button class="btn btn-primary" onclick="openModal('publishCampModal')">+ Publish New Camp</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HERO RIBBON -->
+    <section class="medical-hero-banner">
+      <div class="hero-tag">🌱 National Health Outreach Mission</div>
+      <h2>"Bringing Quality Healthcare &amp; Early Diagnostics to Every Community."</h2>
+      <p>A digitized medical camp management platform for publishing rural drives, scheduling volunteer doctors, and managing citizen registrations.</p>
+      <div class="hero-stats-strip">
+        <span>✓ 100% Free Diagnostics</span>
+        <span>✓ Verified Medical Officers</span>
+        <span>✓ Digital Tokens via Gmail</span>
+        <span>✓ Zero-Paper EHR Sync</span>
+      </div>
+    </section>
+
+    <!-- KPI STATS CARDS -->
+    <section class="stats-row">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Camps Hosted</span>
+          <span class="stat-pill green">+4 Scheduled</span>
+        </div>
+        <div class="stat-number" id="kpiCamps">18</div>
+        <div class="stat-sub">Across 6 rural districts</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Registered Citizens</span>
+          <span class="stat-pill teal">↑ 18% MoM</span>
+        </div>
+        <div class="stat-number" id="kpiParticipants">2,480</div>
+        <div class="stat-sub">87% on-site attendance turnout</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Specialist Doctors</span>
+          <span class="stat-pill amber">Volunteer Roster</span>
+        </div>
+        <div class="stat-number">42</div>
+        <div class="stat-sub">Ophthalmology, Pediatrics, Cardiology</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Essential Medicines</span>
+          <span class="stat-pill green">Free Distribution</span>
+        </div>
+        <div class="stat-number">8,620</div>
+        <div class="stat-sub">Dispensed via mobile pharmacies</div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 1: OUTREACH ANALYTICS ================= -->
+    <section id="analyticsTab" class="view-section">
+      <div class="section-header">
+        <div>
+          <h2>Outreach Graphs &amp; Footfall Analytics</h2>
+          <p style="font-size:13px; color:var(--muted);">Visual metrics on participant registration patterns and medical specialty distribution</p>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-box">
+          <h3>Monthly Registrations &amp; Actual Turnout</h3>
+          <p>Real-time comparison of pre-registered citizens vs. on-site patient turnout</p>
+          <div class="chart-container">
+            <canvas id="registrationChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <h3>Camps by Medical Specialty</h3>
+          <p>Distribution of specialized healthcare camps</p>
+          <div class="chart-container">
+            <canvas id="specialtyChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: CAMPS & SCHEDULES ================= -->
+    <section id="campsTab" class="view-section hidden">
+      <div class="section-header">
+        <div>
+          <h2>Scheduled Medical Camps</h2>
+          <p style="font-size:13px; color:var(--muted);">Manage upcoming locations, dates, target slots, and lead doctors</p>
+        </div>
+        <div class="filter-pills">
+          <button class="pill active" onclick="filterCamps('all', this)">All</button>
+          <button class="pill" onclick="filterCamps('upcoming', this)">Upcoming</button>
+          <button class="pill" onclick="filterCamps('active', this)">Active Today</button>
+          <button class="pill" onclick="filterCamps('completed', this)">Past Camps</button>
+        </div>
+      </div>
+
+      <div class="camps-grid" id="campsContainer"></div>
+    </section>
+
+    <!-- ================= VIEW 3: REGISTERED PARTICIPANTS ================= -->
+    <section id="participantsTab" class="view-section hidden">
+      <div class="section-header">
+        <div>
+          <h2>Registered Participants Directory</h2>
+          <p style="font-size:13px; color:var(--muted);">Citizens registered with verified Gmail tokens</p>
+        </div>
+        <button class="btn btn-outline" onclick="exportParticipantsCSV()">📥 Export as CSV</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <input type="text" class="search-input" id="searchParticipant" placeholder="🔍 Search by name, gmail, or camp name..." oninput="handleParticipantSearch(this.value)" />
+          <div style="font-size:13px; color:var(--muted);" id="participantCountText">
+            Showing registered participants
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>REG. ID</th>
+              <th>NAME &amp; AGE</th>
+              <th>GMAIL / PHONE</th>
+              <th>ASSIGNED CAMP</th>
+              <th>SLOT</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="participantTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODAL: GOOGLE SIGN IN ================= -->
+  <div id="googleAuthModal" class="modal">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <svg class="google-icon" style="width:24px; height:24px;" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span style="font-weight:800; font-size:16px;">Sign in with Google</span>
+        </div>
+        <button class="close-btn" onclick="closeModal('googleAuthModal')">&times;</button>
+      </div>
+
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Choose an account to continue to <strong>ArogyaCamp</strong></p>
+
+      <div class="google-account-list">
+        <div class="google-account-item" onclick="loginWithGoogleAccount('Dr. Sarah Patel', 'dr.sarah.patel@gmail.com', 'SP')">
+          <div class="g-avatar">SP</div>
+          <div>
+            <div style="font-size:13.5px; font-weight:700;">Dr. Sarah Patel</div>
+            <div style="font-size:12px; color:var(--muted);">dr.sarah.patel@gmail.com</div>
+          </div>
+        </div>
+
+        <div class="google-account-item" onclick="loginWithGoogleAccount('Rahul Verma', 'rahul.verma@gmail.com', 'RV')">
+          <div class="g-avatar teal">RV</div>
+          <div>
+            <div style="font-size:13.5px; font-weight:700;">Rahul Verma</div>
+            <div style="font-size:12px; color:var(--muted);">rahul.verma@gmail.com</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center; font-size:12px; color:var(--muted); margin: 12px 0;">— OR ENTER YOUR GMAIL —</div>
+
+      <form onsubmit="handleCustomGoogleLogin(event)">
+        <div class="form-group">
+          <input type="email" id="customGmailInput" placeholder="name@gmail.com" required />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Continue with Gmail</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PARTICIPANT CAMP REGISTRATION ================= -->
+  <div id="participantRegisterModal" class="modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Register for Medical Camp</h3>
+          <p id="regCampSubtitle" class="muted-text" style="font-size:12px; color:var(--primary); font-weight:700;"></p>
+        </div>
+        <button class="close-btn" onclick="closeModal('participantRegisterModal')">&times;</button>
+      </div>
+
+      <form id="participantForm" onsubmit="handleParticipantRegistration(event)">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="pName" placeholder="Your name" required />
+        </div>
+
+        <div class="form-group">
+          <label>Gmail Address (Auto-linked via Google) *</label>
+          <input type="email" id="pEmail" placeholder="name@gmail.com" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Age *</label>
+            <input type="number" id="pAge" placeholder="e.g. 45" required />
+          </div>
+          <div class="form-group">
+            <label>Gender *</label>
+            <select id="pGender" required>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Mobile Number (For SMS Slot Token) *</label>
+          <input type="tel" id="pPhone" placeholder="10-digit number" required />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('participantRegisterModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Slot &amp; Issue Pass</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PUBLISH NEW CAMP ================= -->
+  <div id="publishCampModal" class="modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Publish New Medical Camp</h3>
+        <button class="close-btn" onclick="closeModal('publishCampModal')">&times;</button>
+      </div>
+
+      <form id="campForm" onsubmit="handlePublishCamp(event)">
+        <div class="form-group">
+          <label>Camp Title / Drive Name *</label>
+          <input type="text" id="campTitle" placeholder="e.g. Free Eye Screening &amp; Cataract Drive" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Medical Specialty *</label>
+            <select id="campSpecialty" required>
+              <option value="General Health">General Health &amp; Vitals</option>
+              <option value="Ophthalmology (Eye Care)">Ophthalmology (Eye Care)</option>
+              <option value="Cardiology Screening">Cardiology Screening</option>
+              <option value="Pediatric Care">Pediatric Care</option>
+              <option value="Dental Wellness">Dental Wellness</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lead Medical Officer *</label>
+            <input type="text" id="campDoctor" placeholder="e.g. Dr. A. Sharma, MD" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="campDate" required />
+          </div>
+          <div class="form-group">
+            <label>Participant Capacity *</label>
+            <input type="number" id="campCapacity" placeholder="e.g. 200" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Venue / Rural Center *</label>
+          <input type="text" id="campLocation" placeholder="e.g. Govt Primary School, Sundarpur" required />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('publishCampModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish &amp; Open Slots</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST NOTIFIER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    let currentUser = null;
+
+    let camps = [
+      {
+        id: "CMP-01",
+        title: "Community Vision & Eye Camp",
+        specialty: "Ophthalmology (Eye Care)",
+        doctor: "Dr. Rajiv Menon, MS",
+        date: "2026-10-24",
+        time: "09:00 AM - 04:00 PM",
+        location: "Panchayat Hall, Rampur Village",
+        capacity: 250,
+        registered: 215,
+        status: "upcoming"
+      },
+      {
+        id: "CMP-02",
+        title: "Comprehensive Rural Health Drive",
+        specialty: "General Health",
+        doctor: "Dr. Sarah Patel, MD",
+        date: "2026-10-18",
+        time: "08:30 AM - 03:00 PM",
+        location: "Primary Health Center, Sundarpur",
+        capacity: 300,
+        registered: 290,
+        status: "active"
+      },
+      {
+        id: "CMP-03",
+        title: "Pediatric & Maternal Nutrition Camp",
+        specialty: "Pediatric Care",
+        doctor: "Dr. Ananya Roy, DCH",
+        date: "2026-11-04",
+        time: "10:00 AM - 02:00 PM",
+        location: "Community Center, Belgharia",
+        capacity: 150,
+        registered: 80,
+        status: "upcoming"
+      },
+      {
+        id: "CMP-04",
+        title: "Hypertension & Diabetes Screening",
+        specialty: "Cardiology Screening",
+        doctor: "Dr. Vikram Sethi, DM",
+        date: "2026-10-02",
+        time: "09:00 AM - 05:00 PM",
+        location: "Govt High School, Kashipur",
+        capacity: 200,
+        registered: 200,
+        status: "completed"
+      }
+    ];
+
+    let participants = [
+      { id: "REG-801", name: "Ramesh Kumar", age: 54, gender: "M", email: "ramesh.kumar@gmail.com", phone: "+91 98765-43210", campTitle: "Community Vision & Eye Camp", slot: "24 Oct, 09:30 AM", status: "confirmed" },
+      { id: "REG-802", name: "Sunita Devi", age: 46, gender: "F", email: "sunita.d92@gmail.com", phone: "+91 98111-22334", campTitle: "Comprehensive Rural Health Drive", slot: "18 Oct, 10:00 AM", status: "checked-in" },
+      { id: "REG-803", name: "Vikramjit Singh", age: 62, gender: "M", email: "v.singh62@gmail.com", phone: "+91 98222-33445", campTitle: "Comprehensive Rural Health Drive", slot: "18 Oct, 11:15 AM", status: "checked-in" },
+      { id: "REG-804", name: "Pooja Sharma", age: 28, gender: "F", email: "pooja.sharma@gmail.com", phone: "+91 98444-55667", campTitle: "Pediatric & Maternal Nutrition Camp", slot: "04 Nov, 10:30 AM", status: "confirmed" }
+    ];
+
+    let selectedCampForRegistration = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initCharts();
+      renderCamps(camps);
+      renderParticipants(participants);
+    });
+
+    // TOAST NOTIFICATIONS (Replaces ugly browser alerts)
+    function showToast(message) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerText = message;
+      container.appendChild(toast);
+
+      setTimeout(() => toast.classList.add("show"), 50);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 350);
+      }, 3500);
+    }
+
+    // GOOGLE AUTH
+    function loginWithGoogleAccount(name, email, avatar) {
+      currentUser = { name, email, avatar };
+      updateAuthUI();
+      closeModal("googleAuthModal");
+      showToast(`✓ Signed in with Google as ${name}`);
+    }
+
+    function handleCustomGoogleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("customGmailInput").value;
+      const name = email.split("@")[0].replace(".", " ");
+      const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+      const avatar = formattedName.substring(0, 2).toUpperCase();
+
+      loginWithGoogleAccount(formattedName, email, avatar);
+    }
+
+    function handleSignOut() {
+      currentUser = null;
+      updateAuthUI();
+      showToast("Signed out from Google session");
+    }
+
+    function updateAuthUI() {
+      const gBtn = document.getElementById("googleSignInBtn");
+      const uBadge = document.getElementById("userProfileBadge");
+
+      if (currentUser) {
+        gBtn.style.display = "none";
+        uBadge.style.display = "flex";
+        document.getElementById("userNameText").innerText = currentUser.name;
+        document.getElementById("userEmailText").innerText = currentUser.email;
+        document.getElementById("userAvatarText").innerText = currentUser.avatar;
+      } else {
+        gBtn.style.display = "inline-flex";
+        uBadge.style.display = "none";
+      }
+    }
+
+    // CAMP REGISTRATION WITH GMAIL
+    function startCampRegistration(campTitle) {
+      selectedCampForRegistration = campTitle;
+      document.getElementById("regCampSubtitle").innerText = `Camp: ${campTitle}`;
+
+      if (currentUser) {
+        document.getElementById("pName").value = currentUser.name;
+        document.getElementById("pEmail").value = currentUser.email;
+      } else {
+        document.getElementById("pName").value = "";
+        document.getElementById("pEmail").value = "";
+      }
+
+      openModal("participantRegisterModal");
+    }
+
+    function handleParticipantRegistration(e) {
+      e.preventDefault();
+
+      const newParticipant = {
+        id: `REG-${Math.floor(100 + Math.random() * 900)}`,
+        name: document.getElementById("pName").value,
+        age: parseInt(document.getElementById("pAge").value),
+        gender: document.getElementById("pGender").value,
+        email: document.getElementById("pEmail").value,
+        phone: document.getElementById("pPhone").value,
+        campTitle: selectedCampForRegistration,
+        slot: "Confirmed 09:30 AM Slot",
+        status: "confirmed"
+      };
+
+      participants.unshift(newParticipant);
+
+      const camp = camps.find(c => c.title === selectedCampForRegistration);
+      if (camp) camp.registered += 1;
+
+      renderCamps(camps);
+      renderParticipants(participants);
+      closeModal("participantRegisterModal");
+      e.target.reset();
+
+      showToast(`✓ Pass issued! Token linked to ${newParticipant.email}`);
+      const pTabBtn = document.querySelectorAll(".tab-btn")[2];
+      switchTab("participantsTab", pTabBtn);
+    }
+
+    // CHARTS (GREENISH EMERALD PALETTE)
+    function initCharts() {
+      const ctxReg = document.getElementById("registrationChart").getContext("2d");
+      const gradReg = ctxReg.createLinearGradient(0, 0, 0, 300);
+      gradReg.addColorStop(0, "#10b981");
+      gradReg.addColorStop(1, "#059669");
+
+      new Chart(ctxReg, {
+        type: "bar",
+        data: {
+          labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+          datasets: [
+            { label: "Pre-Registered (Gmail/Web)", data: [320, 410, 480, 530, 620, 780], backgroundColor: gradReg, borderRadius: 6 },
+            { label: "On-Site Turnout", data: [290, 375, 430, 480, 560, 710], backgroundColor: "#065f46", borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: "top" } },
+          scales: { y: { beginAtZero: true, grid: { color: "#ecfdf5" } } }
+        }
+      });
+
+      const ctxSpec = document.getElementById("specialtyChart").getContext("2d");
+      new Chart(ctxSpec, {
+        type: "doughnut",
+        data: {
+          labels: ["General Health", "Eye Care", "Pediatrics", "Cardiology", "Dental"],
+          datasets: [{
+            data: [35, 25, 15, 15, 10],
+            backgroundColor: ["#059669", "#10b981", "#0d9488", "#34d399", "#064e3b"],
+            borderWidth: 2,
+            borderColor: "#ffffff"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: "right" } }
+        }
+      });
+    }
+
+    // RENDER CAMPS
+    function renderCamps(campList) {
+      const container = document.getElementById("campsContainer");
+      container.innerHTML = "";
+
+      campList.forEach(c => {
+        const pct = Math.round((c.registered / c.capacity) * 100);
+        const card = document.createElement("div");
+        card.className = "camp-card";
+        card.innerHTML = `
+          <div>
+            <span class="camp-status-badge ${c.status}">${c.status.toUpperCase()}</span>
+            <div class="camp-title">${c.title}</div>
+            <div class="camp-specialty">🩺 ${c.specialty}</div>
+
+            <div class="camp-details">
+              <div>📅 <strong>Date:</strong> ${c.date} (${c.time})</div>
+              <div>📍 <strong>Venue:</strong> ${c.location}</div>
+              <div>👨‍⚕️ <strong>Lead:</strong> ${c.doctor}</div>
+            </div>
+
+            <div class="capacity-bar-container">
+              <div class="capacity-label">
+                <span>Slots Filled</span>
+                <span>${c.registered} / ${c.capacity} (${pct}%)</span>
+              </div>
+              <div class="capacity-bar-bg">
+                <div class="capacity-bar-fill" style="width: ${Math.min(pct, 100)}%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="camp-card-actions">
+            <button class="btn btn-primary" style="flex:1;" onclick="startCampRegistration('${c.title}')">Register with Gmail</button>
+            <button class="btn btn-outline" onclick="filterParticipantView('${c.title}')">Participants</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterCamps(filter, el) {
+      document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      renderCamps(filter === "all" ? camps : camps.filter(c => c.status === filter));
+    }
+
+    // PARTICIPANTS DIRECTORY
+    function renderParticipants(list) {
+      const tbody = document.getElementById("participantTableBody");
+      tbody.innerHTML = "";
+
+      list.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${p.id}</strong></td>
+          <td>
+            <strong>${p.name}</strong>
+            <div style="font-size:12px; color:var(--muted);">${p.age} Yrs / ${p.gender}</div>
+          </td>
+          <td>
+            <div>${p.email || 'N/A'}</div>
+            <div style="font-size:12px; color:var(--muted);">${p.phone}</div>
+          </td>
+          <td>${p.campTitle}</td>
+          <td>${p.slot}</td>
+          <td><span class="status-tag ${p.status}">${p.status.toUpperCase()}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("participantCountText").innerText = `Showing ${list.length} registered participants`;
+    }
+
+    function handleParticipantSearch(query) {
+      const q = query.toLowerCase();
+      const filtered = participants.filter(p => 
+        p.name.toLowerCase().includes(q) ||
+        (p.email && p.email.toLowerCase().includes(q)) ||
+        p.campTitle.toLowerCase().includes(q)
+      );
+      renderParticipants(filtered);
+    }
+
+    function filterParticipantView(campTitle) {
+      const filtered = participants.filter(p => p.campTitle === campTitle);
+      const participantBtn = document.querySelectorAll(".tab-btn")[2];
+      switchTab("participantsTab", participantBtn);
+      renderParticipants(filtered.length > 0 ? filtered : participants);
+    }
+
+    // PUBLISH CAMP
+    function handlePublishCamp(e) {
+      e.preventDefault();
+
+      const newCamp = {
+        id: `CMP-0${camps.length + 1}`,
+        title: document.getElementById("campTitle").value,
+        specialty: document.getElementById("campSpecialty").value,
+        doctor: document.getElementById("campDoctor").value,
+        date: document.getElementById("campDate").value,
+        time: "09:00 AM - 03:00 PM",
+        location: document.getElementById("campLocation").value,
+        capacity: parseInt(document.getElementById("campCapacity").value),
+        registered: 0,
+        status: "upcoming"
+      };
+
+      camps.unshift(newCamp);
+      renderCamps(camps);
+      document.getElementById("kpiCamps").innerText = camps.length;
+
+      closeModal("publishCampModal");
+      e.target.reset();
+      showToast(`✓ Published "${newCamp.title}"!`);
+      switchTab("campsTab", document.querySelectorAll(".tab-btn")[1]);
+    }
+
+    // TABS & EXPORTS
+    function switchTab(tabId, el) {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      el.classList.add("active");
+      document.querySelectorAll(".view-section").forEach(sec => sec.classList.add("hidden"));
+      document.getElementById(tabId).classList.remove("hidden");
+    }
+
+    function exportParticipantsCSV() {
+      let csv = "Reg ID,Name,Age,Gender,Gmail,Phone,Camp,Slot,Status\n";
+      participants.forEach(p => {
+        csv += `${p.id},"${p.name}",${p.age},${p.gender},"${p.email}","${p.phone}","${p.campTitle}","${p.slot}",${p.status}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "medical_camp_participants.csv";
+      a.click();
+      showToast("✓ Exported participants list to CSV!");
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add("open"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+  </script>
+</body>
+</html>
