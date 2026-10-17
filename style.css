@@ -1,0 +1,494 @@
+/* =======================================================
+   AROGYACAMP - CORE JAVASCRIPT LOGIC
+   With Left Sidebar, Registration Status Lookup, and Google Auth
+======================================================= */
+
+let currentUser = null;
+
+// Initial Published Camps Dataset
+let camps = [
+  {
+    id: "CMP-01",
+    title: "Community Vision & Eye Camp",
+    specialty: "Ophthalmology (Eye Care)",
+    doctor: "Dr. Rajiv Menon, MS",
+    date: "2026-10-24",
+    time: "09:00 AM - 04:00 PM",
+    location: "Panchayat Hall, Rampur Village",
+    capacity: 250,
+    registered: 215,
+    status: "upcoming"
+  },
+  {
+    id: "CMP-02",
+    title: "Comprehensive Rural Health Drive",
+    specialty: "General Health",
+    doctor: "Dr. Sarah Patel, MD",
+    date: "2026-10-18",
+    time: "08:30 AM - 03:00 PM",
+    location: "Primary Health Center, Sundarpur",
+    capacity: 300,
+    registered: 290,
+    status: "active"
+  },
+  {
+    id: "CMP-03",
+    title: "Pediatric & Maternal Nutrition Camp",
+    specialty: "Pediatric Care",
+    doctor: "Dr. Ananya Roy, DCH",
+    date: "2026-11-04",
+    time: "10:00 AM - 02:00 PM",
+    location: "Community Center, Belgharia",
+    capacity: 150,
+    registered: 80,
+    status: "upcoming"
+  },
+  {
+    id: "CMP-04",
+    title: "Hypertension & Diabetes Screening",
+    specialty: "Cardiology Screening",
+    doctor: "Dr. Vikram Sethi, DM",
+    date: "2026-10-02",
+    time: "09:00 AM - 05:00 PM",
+    location: "Govt High School, Kashipur",
+    capacity: 200,
+    registered: 200,
+    status: "completed"
+  }
+];
+
+// Initial Registered Participants Dataset
+let participants = [
+  { id: "REG-801", name: "Ramesh Kumar", age: 54, gender: "M", email: "ramesh.kumar@gmail.com", phone: "98765-43210", campTitle: "Community Vision & Eye Camp", slot: "24 Oct, 09:30 AM", status: "confirmed" },
+  { id: "REG-802", name: "Sunita Devi", age: 46, gender: "F", email: "sunita.d92@gmail.com", phone: "98111-22334", campTitle: "Comprehensive Rural Health Drive", slot: "18 Oct, 10:00 AM", status: "checked-in" },
+  { id: "REG-803", name: "Vikramjit Singh", age: 62, gender: "M", email: "v.singh62@gmail.com", phone: "98222-33445", campTitle: "Comprehensive Rural Health Drive", slot: "18 Oct, 11:15 AM", status: "checked-in" },
+  { id: "REG-804", name: "Pooja Sharma", age: 28, gender: "F", email: "pooja.sharma@gmail.com", phone: "98444-55667", campTitle: "Pediatric & Maternal Nutrition Camp", slot: "04 Nov, 10:30 AM", status: "confirmed" }
+];
+
+let selectedCampForRegistration = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  initCharts();
+  renderCamps(camps);
+  renderParticipants(participants);
+});
+
+/* =======================================================
+   1. NAVIGATION & SIDEBAR CONTROLS
+======================================================= */
+function switchView(viewId, el) {
+  // Update sidebar active link state
+  document.querySelectorAll(".side-link").forEach(btn => btn.classList.remove("active"));
+  if (el) el.classList.add("active");
+
+  // Switch visible section
+  document.querySelectorAll(".view-section").forEach(sec => sec.classList.add("hidden"));
+  document.getElementById(viewId).classList.remove("hidden");
+
+  // Update topbar breadcrumb
+  const titles = {
+    homeTab: "Home / Overview",
+    statusTab: "Check Registration Status",
+    campsTab: "Scheduled Medical Camps",
+    analyticsTab: "Outreach Analytics & Graphs",
+    participantsTab: "Registered Participants Directory"
+  };
+  document.getElementById("currentViewTitle").innerText = titles[viewId] || "ArogyaCamp";
+
+  // Close mobile sidebar if open
+  document.getElementById("sidebarLeft").classList.remove("open");
+}
+
+function toggleSidebar() {
+  document.getElementById("sidebarLeft").classList.toggle("open");
+}
+
+/* =======================================================
+   2. CITIZEN REGISTRATION STATUS LOOKUP ENGINE
+======================================================= */
+function handleStatusLookup(e) {
+  e.preventDefault();
+  const query = document.getElementById("statusQueryInput").value.trim().toLowerCase();
+  const container = document.getElementById("statusResultContainer");
+
+  const match = participants.find(p => 
+    p.id.toLowerCase() === query ||
+    (p.email && p.email.toLowerCase() === query) ||
+    p.phone.replace(/[^0-9]/g, "").includes(query.replace(/[^0-9]/g, ""))
+  );
+
+  if (!match) {
+    container.innerHTML = `
+      <div style="background:#fff1f2; border:1px solid #fecdd3; padding:20px; border-radius:12px; text-align:center;">
+        <h4 style="color:#be123c; margin-bottom:4px;">No Registration Record Found</h4>
+        <p style="color:#881337; font-size:13px;">We couldn't locate any confirmed pass matching "${query}". Please check your Registration ID or contact camp support.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Find linked camp details
+  const camp = camps.find(c => c.title === match.campTitle) || {
+    doctor: "Designated Camp Medical Officer",
+    location: "Main Health Camp Facility"
+  };
+
+  container.innerHTML = `
+    <div class="admit-pass-card">
+      <div class="pass-header">
+        <div>
+          <h3>🏥 Digital Medical Camp Admit Pass</h3>
+          <span>ArogyaCamp Citizen Electronic Token</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:800; font-size:14px;">${match.id}</div>
+          <span class="status-tag ${match.status}">${match.status.toUpperCase()}</span>
+        </div>
+      </div>
+
+      <div class="pass-body">
+        <div class="pass-grid">
+          <div>
+            <div class="pass-field-label">Patient Name</div>
+            <div class="pass-field-val">${match.name} (${match.age}y / ${match.gender})</div>
+          </div>
+          <div>
+            <div class="pass-field-label">Registered Contact</div>
+            <div class="pass-field-val">${match.email || match.phone}</div>
+          </div>
+          <div>
+            <div class="pass-field-label">Assigned Medical Camp</div>
+            <div class="pass-field-val">${match.campTitle}</div>
+          </div>
+          <div>
+            <div class="pass-field-label">Confirmed Slot Time</div>
+            <div class="pass-field-val">${match.slot}</div>
+          </div>
+          <div>
+            <div class="pass-field-label">Venue Location</div>
+            <div class="pass-field-val">${camp.location}</div>
+          </div>
+          <div>
+            <div class="pass-field-label">Lead Medical Officer</div>
+            <div class="pass-field-val">${camp.doctor}</div>
+          </div>
+        </div>
+
+        <div class="pass-qr-strip">
+          <div>
+            <div style="font-weight:800; font-size:13px; color:var(--primary-dark);">Fast-Track QR Token</div>
+            <div style="font-size:11.5px; color:var(--muted);">Present this pass at the triage registration counter for direct entry.</div>
+          </div>
+          <div style="font-size:26px;">🏁 📱</div>
+        </div>
+
+        <div class="pass-actions">
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Print Pass</button>
+          <button class="btn btn-outline" onclick="showToast('✓ Pass details resent to ' + '${match.email || match.phone}')">📲 Resend Token SMS</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  showToast(`✓ Found active pass for ${match.name}`);
+}
+
+/* =======================================================
+   3. GOOGLE AUTHENTICATION SYSTEM
+======================================================= */
+function loginWithGoogleAccount(name, email, avatar) {
+  currentUser = { name, email, avatar };
+  updateAuthUI();
+  closeModal("googleAuthModal");
+  showToast(`✓ Signed in with Google as ${name}`);
+}
+
+function handleCustomGoogleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById("customGmailInput").value;
+  const name = email.split("@")[0].replace(".", " ");
+  const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+  const avatar = formattedName.substring(0, 2).toUpperCase();
+
+  loginWithGoogleAccount(formattedName, email, avatar);
+}
+
+function handleSignOut() {
+  currentUser = null;
+  updateAuthUI();
+  showToast("Signed out from Google session");
+}
+
+function updateAuthUI() {
+  const gBtn = document.getElementById("googleSignInBtn");
+  const uBadge = document.getElementById("userProfileBadge");
+
+  if (currentUser) {
+    gBtn.style.display = "none";
+    uBadge.style.display = "flex";
+    document.getElementById("userNameText").innerText = currentUser.name;
+    document.getElementById("userEmailText").innerText = currentUser.email;
+    document.getElementById("userAvatarText").innerText = currentUser.avatar;
+  } else {
+    gBtn.style.display = "inline-flex";
+    uBadge.style.display = "none";
+  }
+}
+
+/* =======================================================
+   4. CAMP REGISTRATION VIA GMAIL
+======================================================= */
+function startCampRegistration(campTitle) {
+  selectedCampForRegistration = campTitle;
+  document.getElementById("regCampSubtitle").innerText = `Camp: ${campTitle}`;
+
+  if (currentUser) {
+    document.getElementById("pName").value = currentUser.name;
+    document.getElementById("pEmail").value = currentUser.email;
+  } else {
+    document.getElementById("pName").value = "";
+    document.getElementById("pEmail").value = "";
+  }
+
+  openModal("participantRegisterModal");
+}
+
+function handleParticipantRegistration(e) {
+  e.preventDefault();
+
+  const newParticipant = {
+    id: `REG-${Math.floor(100 + Math.random() * 900)}`,
+    name: document.getElementById("pName").value,
+    age: parseInt(document.getElementById("pAge").value),
+    gender: document.getElementById("pGender").value,
+    email: document.getElementById("pEmail").value,
+    phone: document.getElementById("pPhone").value,
+    campTitle: selectedCampForRegistration,
+    slot: "Confirmed 09:30 AM Slot",
+    status: "confirmed"
+  };
+
+  participants.unshift(newParticipant);
+
+  const camp = camps.find(c => c.title === selectedCampForRegistration);
+  if (camp) camp.registered += 1;
+
+  renderCamps(camps);
+  renderParticipants(participants);
+  closeModal("participantRegisterModal");
+  e.target.reset();
+
+  showToast(`✓ Pass issued! Token: ${newParticipant.id}`);
+  
+  // Switch to Status view and display the new pass immediately
+  const statusLink = document.querySelectorAll(".side-link")[1];
+  switchView("statusTab", statusLink);
+  document.getElementById("statusQueryInput").value = newParticipant.id;
+  handleStatusLookup(new Event("submit"));
+}
+
+/* =======================================================
+   5. CHARTS (CHART.JS)
+======================================================= */
+function initCharts() {
+  const ctxReg = document.getElementById("registrationChart").getContext("2d");
+  const gradReg = ctxReg.createLinearGradient(0, 0, 0, 300);
+  gradReg.addColorStop(0, "#10b981");
+  gradReg.addColorStop(1, "#059669");
+
+  new Chart(ctxReg, {
+    type: "bar",
+    data: {
+      labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+      datasets: [
+        { label: "Pre-Registered (Gmail/Web)", data: [320, 410, 480, 530, 620, 780], backgroundColor: gradReg, borderRadius: 6 },
+        { label: "On-Site Turnout", data: [290, 375, 430, 480, 560, 710], backgroundColor: "#065f46", borderRadius: 6 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "top" } },
+      scales: { y: { beginAtZero: true, grid: { color: "#ecfdf5" } } }
+    }
+  });
+
+  const ctxSpec = document.getElementById("specialtyChart").getContext("2d");
+  new Chart(ctxSpec, {
+    type: "doughnut",
+    data: {
+      labels: ["General Health", "Eye Care", "Pediatrics", "Cardiology", "Dental"],
+      datasets: [{
+        data: [35, 25, 15, 15, 10],
+        backgroundColor: ["#059669", "#10b981", "#0d9488", "#34d399", "#064e3b"],
+        borderWidth: 2,
+        borderColor: "#ffffff"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "right" } }
+    }
+  });
+}
+
+/* =======================================================
+   6. CAMPS LIST RENDERING
+======================================================= */
+function renderCamps(campList) {
+  const container = document.getElementById("campsContainer");
+  container.innerHTML = "";
+
+  campList.forEach(c => {
+    const pct = Math.round((c.registered / c.capacity) * 100);
+    const card = document.createElement("div");
+    card.className = "camp-card";
+    card.innerHTML = `
+      <div>
+        <span class="camp-status-badge ${c.status}">${c.status.toUpperCase()}</span>
+        <div class="camp-title">${c.title}</div>
+        <div class="camp-specialty">🩺 ${c.specialty}</div>
+
+        <div class="camp-details">
+          <div>📅 <strong>Date:</strong> ${c.date} (${c.time})</div>
+          <div>📍 <strong>Venue:</strong> ${c.location}</div>
+          <div>👨‍⚕️ <strong>Lead:</strong> ${c.doctor}</div>
+        </div>
+
+        <div class="capacity-bar-container">
+          <div class="capacity-label">
+            <span>Slots Filled</span>
+            <span>${c.registered} / ${c.capacity} (${pct}%)</span>
+          </div>
+          <div class="capacity-bar-bg">
+            <div class="capacity-bar-fill" style="width: ${Math.min(pct, 100)}%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="camp-card-actions">
+        <button class="btn btn-primary" style="flex:1;" onclick="startCampRegistration('${c.title}')">Register with Gmail</button>
+        <button class="btn btn-outline" onclick="filterParticipantView('${c.title}')">Participants</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function filterCamps(filter, el) {
+  document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  renderCamps(filter === "all" ? camps : camps.filter(c => c.status === filter));
+}
+
+/* =======================================================
+   7. PARTICIPANTS DIRECTORY
+======================================================= */
+function renderParticipants(list) {
+  const tbody = document.getElementById("participantTableBody");
+  tbody.innerHTML = "";
+
+  list.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${p.id}</strong></td>
+      <td>
+        <strong>${p.name}</strong>
+        <div style="font-size:11.5px; color:var(--muted);">${p.age} Yrs / ${p.gender}</div>
+      </td>
+      <td>
+        <div>${p.email || 'N/A'}</div>
+        <div style="font-size:11.5px; color:var(--muted);">${p.phone}</div>
+      </td>
+      <td>${p.campTitle}</td>
+      <td>${p.slot}</td>
+      <td><span class="status-tag ${p.status}">${p.status.toUpperCase()}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("participantCountText").innerText = `Showing ${list.length} registered participants`;
+}
+
+function handleParticipantSearch(query) {
+  const q = query.toLowerCase();
+  const filtered = participants.filter(p => 
+    p.name.toLowerCase().includes(q) ||
+    (p.email && p.email.toLowerCase().includes(q)) ||
+    p.campTitle.toLowerCase().includes(q) ||
+    p.id.toLowerCase().includes(q)
+  );
+  renderParticipants(filtered);
+}
+
+function filterParticipantView(campTitle) {
+  const filtered = participants.filter(p => p.campTitle === campTitle);
+  const participantLink = document.querySelectorAll(".side-link")[4];
+  switchView("participantsTab", participantLink);
+  renderParticipants(filtered.length > 0 ? filtered : participants);
+}
+
+/* =======================================================
+   8. PUBLISH CAMP
+======================================================= */
+function handlePublishCamp(e) {
+  e.preventDefault();
+
+  const newCamp = {
+    id: `CMP-0${camps.length + 1}`,
+    title: document.getElementById("campTitle").value,
+    specialty: document.getElementById("campSpecialty").value,
+    doctor: document.getElementById("campDoctor").value,
+    date: document.getElementById("campDate").value,
+    time: "09:00 AM - 03:00 PM",
+    location: document.getElementById("campLocation").value,
+    capacity: parseInt(document.getElementById("campCapacity").value),
+    registered: 0,
+    status: "upcoming"
+  };
+
+  camps.unshift(newCamp);
+  renderCamps(camps);
+  document.getElementById("kpiCamps").innerText = camps.length;
+
+  closeModal("publishCampModal");
+  e.target.reset();
+  showToast(`✓ Published "${newCamp.title}"!`);
+  
+  const campsLink = document.querySelectorAll(".side-link")[2];
+  switchView("campsTab", campsLink);
+}
+
+/* =======================================================
+   9. UTILITIES (TOAST, CSV EXPORT, MODALS)
+======================================================= */
+function showToast(message) {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerText = message;
+  container.appendChild(toast);
+
+  setTimeout(() => toast.classList.add("show"), 50);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 350);
+  }, 3500);
+}
+
+function exportParticipantsCSV() {
+  let csv = "Reg ID,Name,Age,Gender,Gmail,Phone,Camp,Slot,Status\n";
+  participants.forEach(p => {
+    csv += `${p.id},"${p.name}",${p.age},${p.gender},"${p.email}","${p.phone}","${p.campTitle}","${p.slot}",${p.status}\n`;
+  });
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "medical_camp_participants.csv";
+  a.click();
+  showToast("✓ Exported participants list to CSV!");
+}
+
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
